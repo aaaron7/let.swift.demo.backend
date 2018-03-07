@@ -1,0 +1,37 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>Movie List</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <form action="/movie/register_movie" method="POST">
+      screenId : <input type="text" name="screenId" />
+      <br />
+      imdbId : <input type="text" name="imdbId" / >
+      <br />
+      available seats : <input type="text" name="availableSeats" / >
+      <br />
+      <input type="submit" value="新增" />
+    </form>
+    <ul>
+      <li>imdbId screenId availableSeats</li>
+      <% for(var i=0; i<register_movies.length; i++) {%>
+      <li><%= register_movies[i].get('imdbId') %> <%= register_movies[i].get('screenId')%>   
+        <%= register_movies[i].get('availableSeats')%>
+    </li>
+      <% } %>
+    </ul>
+
+    <br /><br /><br /><br />
+    <form action="/movie/reserved_ticket" method="POST">
+        screenId : <input type="text" name="screenId" />
+        <br />
+        imdbId : <input type="text" name="imdbId" / >
+        <br />
+        <input type="submit" value="新增" />
+      </form>
+
+  </body>
+</html>

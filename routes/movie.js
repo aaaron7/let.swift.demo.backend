@@ -2,9 +2,11 @@
 
 var router = require('express').Router();
 var AV = require('leanengine');
+var Fetcher = require('./movie_fetcher');
 
 var RegisteredMovie = AV.Object.extend('registered_movies');
 var ReservedTicket = AV.Object.extend('reserved_tickets');
+var Movie = AV.Object.extend('movies');
 
 /*
 RET CODE DEFINITION:
@@ -39,6 +41,17 @@ router.get('/',function(req, res, next){
     }).catch(next);
 });
 
+router.get('/movie_list',function(req, res, next){
+    var query = new AV.Query(Movie);
+    query.descending('createdAt');
+    query.notEqualTo('imdbId','').find().then(function(results){
+        response = {}
+        response['ret'] = RET_OK;
+        response['data'] = results;
+        sendJSONText(JSON.stringify(response), res);
+    });
+});
+
 router.post('/register_movie', function(req, res,next){
     var imdbId = req.body.imdbId;
     var screenId = req.body.screenId;
@@ -51,6 +64,10 @@ router.post('/register_movie', function(req, res,next){
     registeredMovie.save().then(function(movie){
         sendJSONText(JSON.stringify(movie),res);
     }).catch(next);
+});
+
+router.get('/test_fetcher', function(req, res, next){
+    Fetcher.getMovies();
 });
 
 router.post('/reserved_ticket', function(req, res, next){

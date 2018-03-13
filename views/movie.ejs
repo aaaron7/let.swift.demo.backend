@@ -38,12 +38,18 @@
 
       <br /><br /><br /><br />
       <h1>add screen</h1>
-      <form action="/movie/add_screen" method="POST">
+    <form action="/movie/add_screen" method="POST">
           screenId : <input type="text" name="screenId" />
           <br />
           screenName : <input type="text" name="screenName" / >
           <br />
           <input type="submit" value="新增" />
-        </form>
+    </form>
+    <ul>
+        <li>screenId screenName </li>
+        <% for(var i=0; i<screens.length; i++) {%>
+        <li><%= screens[i].get('screenId') %> <%= screens[i].get('screenName')%>   </li>
+        <% } %>
+      </ul>
   </body>
 </html>

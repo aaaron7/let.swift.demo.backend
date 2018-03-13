@@ -48,17 +48,23 @@ router.get('/movie', function(req, res, next){
 
 router.get('/',function(req, res, next){
     var query = new AV.Query(RegisteredMovie);
+    var screenQuery = new AV.Query(Screen);
     query.descending("createdAt");
-    query.find().then(function(results){
+    screenQuery.descending("createdAt");
+    console.log(screenQuery);
+
+    Promise.all([query.find(), screenQuery.find()]).then(function(values){
+        console.log(values);
         res.render('movie', {
             title : 'Movie List',
-            register_movies : results
+            register_movies : values[0],
+            screens : values[1]
         });
     }).catch(next);
 });
 
-router.get('/register_movie_by_date',function(req, res ,next){
-    var queryDate = req.query.queryDate;
+router.post('/register_movie_by_date',function(req, res ,next){
+    var queryDate = req.body.queryDate;
     console.log(queryDate);
     var query = new AV.Query(RegisteredMovie);
     var beginTime = new Date(queryDate);
@@ -67,7 +73,7 @@ router.get('/register_movie_by_date',function(req, res ,next){
     endTime.setDate(endTime.getDate() + 1);
 
     query.greaterThanOrEqualTo('beginTime',beginTime.toUTCDate()).lessThanOrEqualTo('beginTime', endTime.toUTCDate()).find().then(function(results){
-        sendJSONText(JSON.stringify({"result":results}), res);
+        sendJSONText(JSON.stringify({"result":results,"ret":RET_OK}), res);
     }).catch(next);
 });
 
@@ -120,8 +126,8 @@ router.post('/add_screen', function(req, res, next){
     var screenId = req.body.screenId;
     var screenName = req.body.screenName;
     var screen = new Screen();
-    screen.screenId = screenId;
-    screen.screenName = screenName;
+    screen.set('screenId', screenId);
+    screen.set('screenName', screenName);
     screen.save().then(function(result){
         sendJSONText('successfully add screen', res);
     }).catch(next);

@@ -7,6 +7,7 @@ var Fetcher = require('./movie_fetcher');
 var RegisteredMovie = AV.Object.extend('registered_movies');
 var ReservedTicket = AV.Object.extend('reserved_tickets');
 var Movie = AV.Object.extend('movies');
+var Screen = AV.Object.extend('screens');
 
 /*
 RET CODE DEFINITION:
@@ -15,6 +16,21 @@ RET CODE DEFINITION:
 2 - NO MORE SEATS
 
 */
+
+Date.prototype.addHours = function(h){
+    var copiedDate = new Date(this.getTime());
+    copiedDate.setHours(copiedDate.getHours() + h);
+    return copiedDate;
+}
+
+Date.prototype.toUTCDate = function(){
+    var now = this;
+    var now_utc = new Date();
+
+    var copiedDateUTC = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(),  now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+
+    return copiedDateUTC;
+}
 
 const RET_OK = 0;
 const RET_NO_MORE_SEATS = 2;
@@ -41,33 +57,74 @@ router.get('/',function(req, res, next){
     }).catch(next);
 });
 
+router.get('/register_movie_by_date',function(req, res ,next){
+    var queryDate = req.query.queryDate;
+    console.log(queryDate);
+    var query = new AV.Query(RegisteredMovie);
+    var beginTime = new Date(queryDate);
+    var endTime = new Date(queryDate);
+
+    endTime.setDate(endTime.getDate() + 1);
+
+    query.greaterThanOrEqualTo('beginTime',beginTime.toUTCDate()).lessThanOrEqualTo('beginTime', endTime.toUTCDate()).find().then(function(results){
+        sendJSONText(JSON.stringify({"result":results}), res);
+    }).catch(next);
+});
+
 router.get('/movie_list',function(req, res, next){
     var query = new AV.Query(Movie);
     query.descending('createdAt');
     query.notEqualTo('imdbId','').find().then(function(results){
-        response = {}
-        response['ret'] = RET_OK;
-        response['data'] = results;
-        sendJSONText(JSON.stringify(response), res);
-    });
+        var resp = new Object();
+        resp['ret'] = RET_OK;
+        resp['data'] = results;
+        sendJSONText(JSON.stringify(resp), res);
+    }, function(err){
+        console.log(err);
+    }).catch(next);
 });
 
 router.post('/register_movie', function(req, res,next){
     var imdbId = req.body.imdbId;
     var screenId = req.body.screenId;
     var availableSeats = req.body.availableSeats;
+    var beginTimeString = req.body.beginTime;
+    var endTimeString = req.body.endTime;
+
+    var beginTime = new Date(beginTimeString)
+    var endTime;
+    if (!endTime || endTimeString.length <= 0){
+        endTime = beginTime.addHours(2);    
+    }else{
+        endTime = new Date(endTimeString);
+    }
+
     var registeredMovie = new RegisteredMovie();
     registeredMovie.set('screenId', screenId);
     registeredMovie.set('imdbId', imdbId);
     registeredMovie.set('availableSeats',Number(availableSeats));
-
+    registeredMovie.set('beginTime',beginTime);
+    registeredMovie.set('endTime', endTime);
+    
     registeredMovie.save().then(function(movie){
         sendJSONText(JSON.stringify(movie),res);
     }).catch(next);
+
 });
 
 router.get('/test_fetcher', function(req, res, next){
     Fetcher.getMovies();
+});
+
+router.post('/add_screen', function(req, res, next){
+    var screenId = req.body.screenId;
+    var screenName = req.body.screenName;
+    var screen = new Screen();
+    screen.screenId = screenId;
+    screen.screenName = screenName;
+    screen.save().then(function(result){
+        sendJSONText('successfully add screen', res);
+    }).catch(next);
 });
 
 router.post('/reserved_ticket', function(req, res, next){

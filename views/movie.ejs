@@ -13,6 +13,8 @@
       <br />
       available seats : <input type="text" name="availableSeats" / >
       <br />
+      beginTime: <input type="datetime-local" name="beginTime" />
+      <br />
       <input type="submit" value="新增" />
     </form>
     <ul>
@@ -34,5 +36,14 @@
         <input type="submit" value="新增" />
       </form>
 
+      <br /><br /><br /><br />
+      <h1>add screen</h1>
+      <form action="/movie/add_screen" method="POST">
+          screenId : <input type="text" name="screenId" />
+          <br />
+          screenName : <input type="text" name="screenName" / >
+          <br />
+          <input type="submit" value="新增" />
+        </form>
   </body>
 </html>

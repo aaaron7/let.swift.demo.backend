@@ -82,7 +82,3 @@ function getMovieInfo(url,callback){
 exports.getMovieInfo = getMovieInfo;
 exports.saveMovieInfo = saveMovieInfo;
 exports.getMovies = getMovies;
-
-getMovieInfo("https://movie.douban.com/subject/6390825/",function(info){
-    console.log(info);
-})
